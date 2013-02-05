@@ -1,0 +1,40 @@
+{
+  "name": "its-parser",
+  "title": "jQuery ITS2.0",
+  "description": "JQuery selector plugin for the International Tag Standard 2.0 (ITS2.0).",
+  "keywords": [
+    "its",
+    "multilingual",
+    "jquery",
+    "selector"
+  ],
+  "version": "1.0.0",
+  "author": {
+    "name": "Cocomore AG",
+    "url": "http://www.cocomore.com"
+  },
+  "maintainers": [
+    {
+      "name": "Karl Fritsche",
+      "email": "karl.fritsche@cocomore.com",
+      "url": "http://drupal.org/user/619702"
+    },
+    {
+      "name": "Alejandro Leiva",
+      "email": "Alejandro.Leiva@cocomore.com",
+      "url": "http://drupal.org/user/1866660"
+    }
+  ],
+  "licenses": [
+    {
+      "type": "GPL2.0",
+      "url": "https://github.com/attrib/jquery-its2/blob/master/gpl-2.0.txt"
+    }
+  ],
+  "bugs": "https://github.com/attrib/jquery-its2/issues",
+  "homepage": "https://github.com/attrib/jquery-its2",
+  "docs": "https://github.com/attrib/jquery-its2",
+  "dependencies": {
+    "jquery": ">=1.5"
+  }
+}
