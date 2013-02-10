@@ -768,17 +768,143 @@ $.extend({
         if (callback) {
             return callback(window.rulesController);
         }
+    },
+    getITSData: function(element) {
+        return $(element).getITSData();
+    }
+});
+
+$.fn.extend({
+    getITSData: function() {
+        var element, rule, ruleName, ruleValues, value, values, _i, _len;
+        values = [];
+        for (_i = 0, _len = this.length; _i < _len; _i++) {
+            element = this[_i];
+            ruleValues = window.rulesController.apply(element);
+            if (ruleValues) {
+                delete ruleValues.ParamRule;
+                value = {};
+                for (ruleName in ruleValues) {
+                    rule = ruleValues[ruleName];
+                    value = $.extend(value, rule);
+                }
+                values.push(value);
+            }
+        }
+        if (values.length === 1) {
+            return values.pop();
+        } else {
+            return values;
+        }
     }
 });
 
 $.extend($.expr[":"], {
     translate: function(a, i, m) {
         var query, value;
-        query = "translate=" + (m[3] ? m[3] : "yes");
+        query = m[3] ? m[3] : "yes";
         value = window.rulesController.apply(a, "TranslateRule");
-        return value === query;
+        return value.translate === (query === "yes");
     },
-    locnote: function(a, i, m) {
+    locNote: function(a, i, m) {
+        var type, value;
+        type = m[3] ? m[3] : "any";
+        value = window.rulesController.apply(a, "LocalizationNoteRule");
+        if (value.locNote) {
+            if (type === "any") {
+                return true;
+            } else if (value.locNoteType === type) {
+                return true;
+            }
+        }
         return false;
+    },
+    storageSize: function(a, i, m) {
+        var match, match2, query, test, value, _i, _len;
+        query = m[3] ? m[3] : "any";
+        value = window.rulesController.apply(a, "StorageSizeRule");
+        if (value.storageSize) {
+            if (query === "any") {
+                return true;
+            } else {
+                query = query.split(",");
+                for (_i = 0, _len = query.length; _i < _len; _i++) {
+                    test = query[_i];
+                    match = test.match(/(size|encoding|linebreak):\s*(.*?)\s*$/);
+                    console.log(match);
+                    switch (match[1]) {
+                      case "size":
+                        match2 = match[2].match(/([<>!=]*)\s*(\d*)/);
+                        console.log(match2);
+                        if (match2[2]) {
+                            switch (match2[1]) {
+                              case "":
+                              case "=":
+                              case "==":
+                                if (value.storageSize !== match2[2]) {
+                                    return false;
+                                }
+                                break;
+
+                              case "!=":
+                                if (value.storageSize === match2[2]) {
+                                    return false;
+                                }
+                                break;
+
+                              case ">":
+                                if (value.storageSize > match2[2]) {
+                                    return false;
+                                }
+                                break;
+
+                              case "<":
+                                if (value.storageSize < match2[2]) {
+                                    return false;
+                                }
+                                break;
+
+                              default:
+                                return false;
+                            }
+                        } else {
+                            return false;
+                        }
+                        break;
+
+                      case "encoding":
+                        if (value.storageEncoding !== match[2]) {
+                            return false;
+                        }
+                        break;
+
+                      case "linebreak":
+                        if (value.lineBreakType !== match[2]) {
+                            return false;
+                        }
+                        break;
+
+                      default:
+                        return false;
+                    }
+                }
+                return true;
+            }
+        }
+        return false;
+        return {
+            allowedCharacters: function(a, i, m) {
+                query = m[3] ? m[3] : "any";
+                value = window.rulesController.apply(a, "AllowedCharactersRule");
+                if (value.allowedCharacters) {
+                    if (query === "any") {
+                        return true;
+                    } else if (value.allowedCharacters === query) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        };
     }
 });

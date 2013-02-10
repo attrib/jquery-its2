@@ -1,14 +1,14 @@
 {
   "name": "its-parser",
-  "title": "jQuery ITS2.0",
-  "description": "JQuery selector plugin for the International Tag Standard 2.0 (ITS2.0).",
+  "title": "jQuery ITS2.0 Parser",
+  "description": "JQuery selector plugin for the International Tag Standard 2.0 (ITS 2.0). Adds selectors to get nodes in the DOM with specific ITS data. Also has a function to get all the ITS information from a jQuery list.",
   "keywords": [
     "its",
     "multilingual",
     "jquery",
     "selector"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "author": {
     "name": "Cocomore AG",
     "url": "http://www.cocomore.com"
