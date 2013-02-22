@@ -167,7 +167,7 @@ RulesController = function() {
     };
     RulesController.prototype.addXML = function(xml) {
         var child, _i, _len, _ref, _results;
-        if (xml.tagName && xml.tagName.toLowerCase() === "its:rules" && $(xml).attr("version") === "2.0") {
+        if (xml.tagName && xml.tagName.toLowerCase() === "its:rules" && ($(xml).attr("version") === "2.0" || $(xml).attr("its:version") === "2.0")) {
             return this.parseXML(xml);
         } else {
             if (xml.hasChildNodes) {
@@ -292,7 +292,7 @@ TranslateRule = function(_super) {
         if (value instanceof Object) {
             ret = value;
         }
-        if ($(tag).attr(this.NAME)) {
+        if ($(tag).attr(this.NAME) !== void 0) {
             ret = {
                 translate: normalize($(tag).attr(this.NAME))
             };
@@ -310,6 +310,9 @@ TranslateRule = function(_super) {
         };
     };
     normalize = function(translateString) {
+        if (typeof translateString === "boolean") {
+            return translateString;
+        }
         translateString = translateString.replace(/^\s+|\s+$/g, "").toLowerCase();
         if (translateString === "yes") {
             return true;
@@ -892,19 +895,18 @@ $.extend($.expr[":"], {
             }
         }
         return false;
-        return {
-            allowedCharacters: function(a, i, m) {
-                query = m[3] ? m[3] : "any";
-                value = window.rulesController.apply(a, "AllowedCharactersRule");
-                if (value.allowedCharacters) {
-                    if (query === "any") {
-                        return true;
-                    } else if (value.allowedCharacters === query) {
-                        return true;
-                    }
-                }
-                return false;
+    },
+    allowedCharacters: function(a, i, m) {
+        var query, value;
+        query = m[3] ? m[3] : "any";
+        value = window.rulesController.apply(a, "AllowedCharactersRule");
+        if (value.allowedCharacters) {
+            if (query === "any") {
+                return true;
+            } else if (value.allowedCharacters === query) {
+                return true;
             }
-        };
+        }
+        return false;
     }
 });
