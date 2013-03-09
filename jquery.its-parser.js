@@ -56,6 +56,9 @@ XPath = function() {
     };
     XPath.prototype.process = function(selector) {
         var attribute, docElement, domElement, nsResolver, res, result, xpe;
+        if (!(this.element != null)) {
+            return false;
+        }
         selector = this.filter(selector);
         xpe = new XPathEvaluator();
         domElement = this.element.get(0);
@@ -292,7 +295,7 @@ TranslateRule = function(_super) {
         if (value instanceof Object) {
             ret = value;
         }
-        if ($(tag).attr(this.NAME) !== void 0) {
+        if (tag.hasAttribute(this.NAME && $(tag).attr(this.NAME) !== void 0)) {
             ret = {
                 translate: normalize($(tag).attr(this.NAME))
             };
@@ -834,11 +837,9 @@ $.extend($.expr[":"], {
                 for (_i = 0, _len = query.length; _i < _len; _i++) {
                     test = query[_i];
                     match = test.match(/(size|encoding|linebreak):\s*(.*?)\s*$/);
-                    console.log(match);
                     switch (match[1]) {
                       case "size":
                         match2 = match[2].match(/([<>!=]*)\s*(\d*)/);
-                        console.log(match2);
                         if (match2[2]) {
                             switch (match2[1]) {
                               case "":
