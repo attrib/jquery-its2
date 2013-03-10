@@ -295,7 +295,7 @@ TranslateRule = function(_super) {
         if (value instanceof Object) {
             ret = value;
         }
-        if (tag.hasAttribute(this.NAME && $(tag).attr(this.NAME) !== void 0)) {
+        if (tag.hasAttribute(this.NAME) && $(tag).attr(this.NAME) !== void 0) {
             ret = {
                 translate: normalize($(tag).attr(this.NAME))
             };
