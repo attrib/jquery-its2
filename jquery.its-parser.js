@@ -46,13 +46,18 @@ XPath = function() {
     }
     XPath.instances_el = [];
     XPath.instances = [];
-    XPath.getInstance = function(element) {
-        var index, instance;
+    XPath.getInstance = function(elementjQ) {
+        var element, index, instance;
+        if (elementjQ.jquery != null) {
+            element = elementjQ.get(0);
+        } else {
+            element = elementjQ;
+        }
         index = XPath.instances_el.indexOf(element);
         if (index !== -1) {
             instance = XPath.instances[index];
         } else {
-            instance = new XPath(element);
+            instance = new XPath(elementjQ);
             XPath.instances.push(instance);
             XPath.instances_el.push(element);
         }
