@@ -1,6 +1,8 @@
 Version 1.2.0 (development)
 ===========================
 
+* attrib: Changed Inheritance to not use XPath at all (performance)
+* attrib: Removed automatic build of XPath as its not needed everywhere (performance)
 * attrib: Fixed couple of performance issues.
 * attrib: Fixed XPath instances got initialized multiple times for the same element
 * attrib: Added not dir operator for directionality rule.

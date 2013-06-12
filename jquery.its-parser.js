@@ -42,7 +42,6 @@ XPath = function() {
         } else {
             this.element = element;
         }
-        this.build();
     }
     XPath.instances_el = [];
     XPath.instances = [];
@@ -64,8 +63,10 @@ XPath = function() {
         return instance;
     };
     XPath.prototype.build = function() {
-        this.path = this.path.concat(this.parents());
-        return this.path = this.path.concat(this.index(this.element));
+        if (this.path === "") {
+            this.path = this.path.concat(this.parents());
+            return this.path = this.path.concat(this.index(this.element));
+        }
     };
     XPath.prototype.parents = function() {
         var parentPath, parents, _this = this;
@@ -101,7 +102,7 @@ XPath = function() {
         }
         return string;
     };
-    XPath.prototype.filter = function(selector) {
+    XPath.filter = function(selector) {
         return selector.replace(/h:/g, "");
     };
     XPath.prototype.query = function(selector, resultType) {
@@ -109,14 +110,13 @@ XPath = function() {
         domElement = this.element;
         return document.evaluate(selector, domElement, null, resultType, null);
     };
-    XPath.prototype.process = function(selector) {
-        var attribute, docElement, domElement, nsResolver, res, result, xpe;
-        if (!(this.element != null)) {
+    XPath.process = function(selector, domElement) {
+        var attribute, docElement, nsResolver, res, result, xpe;
+        if (!(domElement != null)) {
             return false;
         }
         selector = this.filter(selector);
         xpe = new XPathEvaluator();
-        domElement = this.element;
         attribute = false;
         if (domElement instanceof Attr) {
             attribute = domElement;
@@ -138,8 +138,8 @@ XPath = function() {
     };
     XPath.prototype.resolve = function(selector, pointer) {
         var matchedElement, obj, result, ret, unrolled, value, values, xpath;
-        selector = this.filter(selector);
-        pointer = this.filter(pointer);
+        selector = XPath.filter(selector);
+        pointer = XPath.filter(pointer);
         result = this.query(selector, XPathResult.ORDERED_NODE_ITERATOR_TYPE);
         unrolled = [];
         while (matchedElement = result.iterateNext()) {
@@ -149,6 +149,7 @@ XPath = function() {
             while (value = ret.iterateNext()) {
                 values.push(value);
             }
+            xpath.build();
             obj = {
                 selector: xpath.path,
                 result: values[0],
@@ -177,7 +178,8 @@ Rule = function() {
         this.apply = __bind(this.apply, this);
         this.parse = __bind(this.parse, this);
         this.rules = [];
-        this.applied = {};
+        this.appliedValues = [];
+        this.appliedElements = [];
         this.standoff = [];
     }
     Rule.prototype.parse = function(rule, content) {
@@ -187,14 +189,13 @@ Rule = function() {
         throw new Error("AbstractClass Rule: method apply not implemented.");
     };
     Rule.prototype.applyRules = function(ret, tag, attributes) {
-        var attribute, rule, store, xpath, _i, _j, _len, _len1, _ref;
-        xpath = XPath.getInstance(tag);
+        var attribute, rule, store, _i, _j, _len, _len1, _ref;
         store = false;
         _ref = this.rules;
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
             rule = _ref[_i];
             if (rule.type = this.NAME) {
-                if (xpath.process(rule.selector)) {
+                if (XPath.process(rule.selector, tag)) {
                     for (_j = 0, _len1 = attributes.length; _j < _len1; _j++) {
                         attribute = attributes[_j];
                         if (rule[attribute] != null) {
@@ -272,21 +273,21 @@ Rule = function() {
         return this.rules.push(object);
     };
     Rule.prototype.inherited = function(node) {
-        var xpath;
+        var index;
         while (1) {
-            xpath = XPath.getInstance(node);
-            if (this.applied[xpath.path]) {
-                return $.extend(true, {}, this.applied[xpath.path]);
+            index = this.appliedElements.indexOf(node);
+            if (index > -1) {
+                return $.extend(true, {}, this.appliedValues[index]);
             } else {
                 node = node.parentNode;
-                if (node === document) {
+                if (node === document || node === null) {
                     return;
                 }
             }
         }
     };
     Rule.prototype.store = function(node, object) {
-        var k, xpath;
+        var index, k;
         if (function() {
             var _results;
             _results = [];
@@ -296,8 +297,13 @@ Rule = function() {
             }
             return _results;
         }().length !== 0) {
-            xpath = XPath.getInstance(node);
-            return this.applied[xpath.path] = object;
+            index = this.appliedElements.indexOf(node);
+            if (index > -1) {
+                return this.appliedValues[index] = object;
+            } else {
+                this.appliedElements.push(node);
+                return this.appliedValues.push(object);
+            }
         }
     };
     Rule.prototype.normalizeYesNo = function(translateString) {
@@ -3042,7 +3048,8 @@ $.extend({
         _results = [];
         for (_j = 0, _len1 = globalRules.length; _j < _len1; _j++) {
             rule = globalRules[_j];
-            _results.push(rule.applied = {});
+            rule.appliedValues = [];
+            _results.push(rule.appliedElements = []);
         }
         return _results;
     }
