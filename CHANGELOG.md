@@ -1,6 +1,7 @@
 Version 1.2.0 (development)
 ===========================
 
+* attrib: Fixed couple of performance issues.
 * attrib: Fixed XPath instances got initialized multiple times for the same element
 * attrib: Added not dir operator for directionality rule.
 * attrib: Added not language operator for language information rule.

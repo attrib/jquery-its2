@@ -38,9 +38,9 @@ XPath = function() {
             return null;
         }
         if (element.jquery != null) {
-            this.element = element;
+            this.element = element.get(0);
         } else {
-            this.element = $(element);
+            this.element = element;
         }
         this.build();
     }
@@ -57,7 +57,7 @@ XPath = function() {
         if (index !== -1) {
             instance = XPath.instances[index];
         } else {
-            instance = new XPath(elementjQ);
+            instance = new XPath(element);
             XPath.instances.push(instance);
             XPath.instances_el.push(element);
         }
@@ -65,15 +65,15 @@ XPath = function() {
     };
     XPath.prototype.build = function() {
         this.path = this.path.concat(this.parents());
-        return this.path = this.path.concat(this.index(this.element.get(0)));
+        return this.path = this.path.concat(this.index(this.element));
     };
     XPath.prototype.parents = function() {
         var parentPath, parents, _this = this;
         parentPath = "";
-        if (this.element.get(0) instanceof Attr) {
-            parents = $(this.element.get(0).ownerElement).parents().get().reverse();
+        if (this.element instanceof Attr) {
+            parents = $(this.element.ownerElement).parents().get().reverse();
         } else {
-            parents = this.element.parents().get().reverse();
+            parents = $(this.element).parents().get().reverse();
         }
         $.each(parents, function(i, parent) {
             return parentPath = parentPath.concat(_this.index(parent));
@@ -81,15 +81,16 @@ XPath = function() {
         return parentPath;
     };
     XPath.prototype.index = function(element) {
-        var attribute, attributeName, nodeName, position, prevSiblings, string;
+        var $element, attribute, attributeName, nodeName, position, prevSiblings, string;
         if (element instanceof Attr) {
             attribute = element;
             element = element.ownerElement;
         }
         nodeName = element.nodeName.toLowerCase();
-        prevSiblings = $(element).prevAll(nodeName);
+        $element = $(element);
+        prevSiblings = $element.prevAll(nodeName);
         position = prevSiblings.length + 1;
-        if ($(element).parents().length === 0) {
+        if ($element.parents().length === 0) {
             string = "/" + nodeName;
         } else {
             string = "/" + nodeName + "[" + position + "]";
@@ -105,7 +106,7 @@ XPath = function() {
     };
     XPath.prototype.query = function(selector, resultType) {
         var domElement;
-        domElement = this.element.get(0);
+        domElement = this.element;
         return document.evaluate(selector, domElement, null, resultType, null);
     };
     XPath.prototype.process = function(selector) {
@@ -115,7 +116,7 @@ XPath = function() {
         }
         selector = this.filter(selector);
         xpe = new XPathEvaluator();
-        domElement = this.element.get(0);
+        domElement = this.element;
         attribute = false;
         if (domElement instanceof Attr) {
             attribute = domElement;
@@ -209,15 +210,23 @@ Rule = function() {
         }
     };
     Rule.prototype.applyAttributes = function(ret, tag) {
-        var attributeName, attributeValue, objectName, store, _ref;
-        if (this.attributes != null) {
+        var attribute, attributeName, objectName, store, _i, _len, _ref, _ref1;
+        if (this.attributes != null && tag.attributes != null) {
+            if (!(this.attributesFlipped != null)) {
+                this.attributesFlipped = {};
+                _ref = this.attributes;
+                for (objectName in _ref) {
+                    attributeName = _ref[objectName];
+                    this.attributesFlipped[attributeName] = objectName;
+                }
+            }
             store = false;
-            _ref = this.attributes;
-            for (objectName in _ref) {
-                attributeName = _ref[objectName];
-                attributeValue = $(tag).attr(attributeName);
-                if (attributeValue != null) {
-                    ret[objectName] = attributeValue;
+            _ref1 = tag.attributes;
+            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+                attribute = _ref1[_i];
+                attributeName = attribute.nodeName;
+                if (this.attributesFlipped[attributeName] != null) {
+                    ret[this.attributesFlipped[attributeName]] = attribute.nodeValue;
                     store = true;
                 }
             }
@@ -263,14 +272,16 @@ Rule = function() {
         return this.rules.push(object);
     };
     Rule.prototype.inherited = function(node) {
-        var parent, parents, xpath, _i, _len;
-        parents = $(node).parents();
-        parents.splice(0, 0, $(node));
-        for (_i = 0, _len = parents.length; _i < _len; _i++) {
-            parent = parents[_i];
-            xpath = XPath.getInstance(parent);
+        var xpath;
+        while (1) {
+            xpath = XPath.getInstance(node);
             if (this.applied[xpath.path]) {
                 return $.extend(true, {}, this.applied[xpath.path]);
+            } else {
+                node = node.parentNode;
+                if (node === document) {
+                    return;
+                }
             }
         }
     };
