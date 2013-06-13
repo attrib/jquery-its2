@@ -29,6 +29,7 @@ var XPath, __bind = function(fn, me) {
 };
 
 XPath = function() {
+    XPath.cache = true;
     function XPath(element) {
         this.parents = __bind(this.parents, this);
         this.build = __bind(this.build, this);
@@ -43,22 +44,18 @@ XPath = function() {
             this.element = element;
         }
     }
-    XPath.instances_el = [];
-    XPath.instances = [];
     XPath.getInstance = function(elementjQ) {
-        var element, index, instance;
+        var element, instance;
         if (elementjQ.jquery != null) {
             element = elementjQ.get(0);
         } else {
             element = elementjQ;
         }
-        index = XPath.instances_el.indexOf(element);
-        if (index !== -1) {
-            instance = XPath.instances[index];
+        if (element.itsXPath != null && XPath.cache) {
+            instance = element.itsXPath;
         } else {
             instance = new XPath(element);
-            XPath.instances.push(instance);
-            XPath.instances_el.push(element);
+            element.itsXPath = instance;
         }
         return instance;
     };
@@ -178,8 +175,6 @@ Rule = function() {
         this.apply = __bind(this.apply, this);
         this.parse = __bind(this.parse, this);
         this.rules = [];
-        this.appliedValues = [];
-        this.appliedElements = [];
         this.standoff = [];
     }
     Rule.prototype.parse = function(rule, content) {
@@ -273,11 +268,9 @@ Rule = function() {
         return this.rules.push(object);
     };
     Rule.prototype.inherited = function(node) {
-        var index;
         while (1) {
-            index = this.appliedElements.indexOf(node);
-            if (index > -1) {
-                return $.extend(true, {}, this.appliedValues[index]);
+            if (node.itsRuleInherit != null && node.itsRuleInherit[this.NAME] != null && XPath.cache) {
+                return $.extend(true, {}, node.itsRuleInherit[this.NAME]);
             } else {
                 node = node.parentNode;
                 if (node === document || node === null) {
@@ -287,7 +280,7 @@ Rule = function() {
         }
     };
     Rule.prototype.store = function(node, object) {
-        var index, k;
+        var k;
         if (function() {
             var _results;
             _results = [];
@@ -297,12 +290,13 @@ Rule = function() {
             }
             return _results;
         }().length !== 0) {
-            index = this.appliedElements.indexOf(node);
-            if (index > -1) {
-                return this.appliedValues[index] = object;
+            if (node.itsRuleInherit != null && node.itsRuleInherit[this.NAME] != null && XPath.cache) {
+                return node.itsRuleInherit = $.extend(true, node.itsRuleInherit, object);
             } else {
-                this.appliedElements.push(node);
-                return this.appliedValues.push(object);
+                if (!(node.itsRuleInherit != null)) {
+                    node.itsRuleInherit = {};
+                }
+                return node.itsRuleInherit[this.NAME] = object;
             }
         }
     };
@@ -3042,16 +3036,23 @@ $.extend({
         return $(element).getITSData();
     },
     clearITSCache: function() {
-        var _j, _len1, _results;
-        XPath.instances = [];
-        XPath.instances_el = [];
-        _results = [];
-        for (_j = 0, _len1 = globalRules.length; _j < _len1; _j++) {
-            rule = globalRules[_j];
-            rule.appliedValues = [];
-            _results.push(rule.appliedElements = []);
+        var attributes, tag, _j, _k, _len1, _len2, _ref, _ref1;
+        XPath.cache = false;
+        _ref = $("*");
+        for (_j = 0, _len1 = _ref.length; _j < _len1; _j++) {
+            tag = _ref[_j];
+            delete tag.itsRuleInherit;
+            delete tag.itsXPath;
+            if (tag.attributes.length !== 0) {
+                _ref1 = tag.attributes;
+                for (_k = 0, _len2 = _ref1.length; _k < _len2; _k++) {
+                    attributes = _ref1[_k];
+                    delete attributes.itsRuleInherit;
+                    delete attributes.itsXPath;
+                }
+            }
         }
-        return _results;
+        return XPath.cache = true;
     }
 });
 

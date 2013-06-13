@@ -1,6 +1,7 @@
 Version 1.2.0 (development)
 ===========================
 
+* attrib: Added Inheritance and XPath data to the tag itself (performance)
 * attrib: Changed Inheritance to not use XPath at all (performance)
 * attrib: Removed automatic build of XPath as its not needed everywhere (performance)
 * attrib: Fixed couple of performance issues.
