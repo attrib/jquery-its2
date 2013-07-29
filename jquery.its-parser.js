@@ -1032,13 +1032,19 @@ ElementsWithinTextRule = function(_super) {
         return ret;
     };
     ElementsWithinTextRule.prototype.def = function(tag) {
-        var _ref, _ref1;
+        var _ref, _ref1, _ref2;
         if ($(tag).parents("body").length > 0) {
             if ((_ref = tag.nodeName.toLowerCase()) === "a" || _ref === "abbr" || _ref === "area" || _ref === "audio" || _ref === "b" || _ref === "bdi" || _ref === "bdo" || _ref === "br" || _ref === "button" || _ref === "canvas" || _ref === "cite" || _ref === "code" || _ref === "command" || _ref === "datalist" || _ref === "del" || _ref === "dfn" || _ref === "em" || _ref === "embed" || _ref === "i" || _ref === "img" || _ref === "input" || _ref === "ins" || _ref === "kbd" || _ref === "keygen" || _ref === "label" || _ref === "map" || _ref === "mark" || _ref === "math" || _ref === "meter" || _ref === "object" || _ref === "output" || _ref === "progress" || _ref === "q" || _ref === "ruby" || _ref === "s" || _ref === "samp" || _ref === "select" || _ref === "small" || _ref === "span" || _ref === "strong" || _ref === "sub" || _ref === "sup" || _ref === "svg" || _ref === "time" || _ref === "u" || _ref === "var" || _ref === "video" || _ref === "wbr") {
                 return {
                     withinText: "yes"
                 };
             } else if ((_ref1 = tag.nodeName.toLowerCase()) === "iframe" || _ref1 === "noscript" || _ref1 === "script" || _ref1 === "textarea") {
+                return {
+                    withinText: "nested"
+                };
+            }
+        } else {
+            if ((_ref2 = tag.nodeName.toLowerCase()) === "noscript" || _ref2 === "script") {
                 return {
                     withinText: "nested"
                 };

@@ -1,7 +1,7 @@
 jQuery ITS2.0
 =============
 
-**This the current development version and not yet stable. This Version supports all data categories and hopefully will be releases soon.** (2013-06-06)
+**This the current development version and not yet stable. This Version supports all data categories and will be released when ITS2.0 hits recommendation status.** (2013-07-29)
 
 JQuery selector plugin for the [International Tag Standard 2.0 (ITS2.0)](http://www.w3.org/TR/its20/).
 
